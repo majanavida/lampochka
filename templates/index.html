@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Лампочка</title>
+    <style>
+      :root {
+        --bg: #f6f3ea;
+        --card: #fffdf8;
+        --text: #2e2a24;
+        --muted: #6a6257;
+        --line: #ded6c7;
+        --on: #ffd54a;
+        --off: #c9c4b8;
+        --shadow: rgba(0, 0, 0, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        font-family: "Segoe UI", Tahoma, sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top, #fff6ca 0, transparent 30%),
+          linear-gradient(180deg, #f7f2e6 0%, #ece4d3 100%);
+      }
+
+      .card {
+        width: min(92vw, 640px);
+        padding: 32px;
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: var(--card);
+        box-shadow: 0 18px 40px var(--shadow);
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-size: 32px;
+      }
+
+      .status {
+        margin: 0 0 24px;
+        font-size: 18px;
+      }
+
+      .status strong {
+        text-transform: lowercase;
+      }
+
+      .lamp-wrap {
+        display: grid;
+        place-items: center;
+        margin: 28px 0;
+      }
+
+      .lamp {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: {% if bulb_state == "on" %}var(--on){% else %}var(--off){% endif %};
+        box-shadow:
+          0 0 0 10px rgba(255, 255, 255, 0.7),
+          {% if bulb_state == "on" %}
+          0 0 45px rgba(255, 213, 74, 0.9)
+          {% else %}
+          0 0 0 rgba(0, 0, 0, 0)
+          {% endif %};
+        transition: 0.2s ease;
+      }
+
+      .lamp::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: -24px;
+        width: 40px;
+        height: 28px;
+        transform: translateX(-50%);
+        border-radius: 0 0 12px 12px;
+        background: #8e8579;
+      }
+
+      .commands {
+        margin-top: 24px;
+        padding: 18px 20px;
+        border-radius: 16px;
+        background: #f6f1e7;
+      }
+
+      .commands p,
+      .note {
+        margin: 8px 0;
+      }
+
+      code {
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: #efe7d8;
+        font-family: Consolas, monospace;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .note {
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <h1>Лампочка</h1>
+      <p class="status">Текущий статус: <strong>{{ bulb_state }}</strong></p>
+
+      <div class="lamp-wrap" aria-label="Состояние лампочки">
+        <div class="lamp"></div>
+      </div>
+
+      <div class="commands">
+        <p><a href="/button_on"><code>/button_on</code></a>, чтобы включить.</p>
+        <p><a href="/button_off"><code>/button_off</code></a>, чтобы выключить.</p>
+      </div>
+
+      
+    </main>
+  </body>
+</html>
