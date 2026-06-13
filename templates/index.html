@@ -3,17 +3,19 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Лампочка</title>
+    <title>Робо-рука</title>
     <style>
       :root {
-        --bg: #f6f3ea;
-        --card: #fffdf8;
-        --text: #2e2a24;
-        --muted: #6a6257;
-        --line: #ded6c7;
-        --on: #ffd54a;
-        --off: #c9c4b8;
-        --shadow: rgba(0, 0, 0, 0.12);
+        --bg: #eef2f5;
+        --card: #ffffff;
+        --text: #1f2933;
+        --muted: #596673;
+        --line: #d5dde5;
+        --metal: #a8b4c0;
+        --metal-dark: #6f7f8f;
+        --accent: #35a3d6;
+        --accent-dark: #1f7ca8;
+        --shadow: rgba(31, 41, 51, 0.14);
       }
 
       * {
@@ -27,18 +29,16 @@
         place-items: center;
         font-family: "Segoe UI", Tahoma, sans-serif;
         color: var(--text);
-        background:
-          radial-gradient(circle at top, #fff6ca 0, transparent 30%),
-          linear-gradient(180deg, #f7f2e6 0%, #ece4d3 100%);
+        background: linear-gradient(180deg, #f7fafc 0%, var(--bg) 100%);
       }
 
       .card {
         width: min(92vw, 640px);
         padding: 32px;
         border: 1px solid var(--line);
-        border-radius: 24px;
+        border-radius: 18px;
         background: var(--card);
-        box-shadow: 0 18px 40px var(--shadow);
+        box-shadow: 0 18px 42px var(--shadow);
       }
 
       h1 {
@@ -52,86 +52,189 @@
       }
 
       .status strong {
+        color: var(--accent-dark);
         text-transform: lowercase;
       }
 
-      .lamp-wrap {
+      .robot-area {
         display: grid;
         place-items: center;
-        margin: 28px 0;
+        min-height: 240px;
+        margin: 20px 0 28px;
+        border-radius: 14px;
+        background: #f3f7fa;
+        overflow: hidden;
       }
 
-      .lamp {
+      .robot-hand {
         position: relative;
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        background: {% if bulb_state == "on" %}var(--on){% else %}var(--off){% endif %};
-        box-shadow:
-          0 0 0 10px rgba(255, 255, 255, 0.7),
-          {% if bulb_state == "on" %}
-          0 0 45px rgba(255, 213, 74, 0.9)
-          {% else %}
-          0 0 0 rgba(0, 0, 0, 0)
-          {% endif %};
-        transition: 0.2s ease;
+        width: 300px;
+        height: 190px;
       }
 
-      .lamp::before {
+      .arm {
+        position: absolute;
+        left: 18px;
+        top: 92px;
+        width: 130px;
+        height: 38px;
+        border: 3px solid var(--metal-dark);
+        border-radius: 20px;
+        background: linear-gradient(180deg, #d8e0e7, var(--metal));
+      }
+
+      .joint {
+        position: absolute;
+        left: 124px;
+        top: 78px;
+        width: 72px;
+        height: 72px;
+        border: 4px solid var(--metal-dark);
+        border-radius: 50%;
+        background: radial-gradient(circle, #f7fafc 0 22%, var(--accent) 24% 48%, var(--metal) 50%);
+        z-index: 2;
+      }
+
+      .palm {
+        position: absolute;
+        left: 174px;
+        top: 70px;
+        width: 86px;
+        height: 92px;
+        border: 3px solid var(--metal-dark);
+        border-radius: 22px;
+        background: linear-gradient(180deg, #d8e0e7, #9facba);
+        z-index: 3;
+      }
+
+      .palm::after {
         content: "";
         position: absolute;
-        left: 50%;
-        bottom: -24px;
-        width: 40px;
-        height: 28px;
-        transform: translateX(-50%);
-        border-radius: 0 0 12px 12px;
-        background: #8e8579;
+        right: 9px;
+        top: 18px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--metal-dark);
+        box-shadow:
+          0 24px 0 var(--metal-dark),
+          0 48px 0 var(--metal-dark);
+      }
+
+      .finger {
+        position: absolute;
+        left: 247px;
+        width: {% if hand_state == "сжата" %}64px{% else %}82px{% endif %};
+        height: 22px;
+        border: 3px solid var(--metal-dark);
+        border-radius: 999px;
+        background: linear-gradient(180deg, #dce4ea, var(--metal));
+        box-shadow: inset -18px 0 0 rgba(255, 255, 255, 0.2);
+        transform-origin: 10px 50%;
+        transition: transform 0.2s ease;
+        z-index: 2;
+      }
+
+      .finger::before {
+        content: "";
+        position: absolute;
+        left: 29px;
+        top: -3px;
+        width: 3px;
+        height: 22px;
+        background: var(--metal-dark);
+        opacity: 0.55;
+      }
+
+      .finger.top {
+        top: 80px;
+        transform: {% if hand_state == "сжата" %}rotate(30deg){% else %}rotate(-16deg){% endif %};
+      }
+
+      .finger.middle {
+        top: 105px;
+        transform: {% if hand_state == "сжата" %}rotate(0deg){% else %}rotate(0deg){% endif %};
+      }
+
+      .finger.bottom {
+        top: 130px;
+        transform: {% if hand_state == "сжата" %}rotate(-30deg){% else %}rotate(16deg){% endif %};
+      }
+
+      .thumb {
+        position: absolute;
+        left: 213px;
+        top: 63px;
+        width: {% if hand_state == "сжата" %}60px{% else %}74px{% endif %};
+        height: 22px;
+        border: 3px solid var(--metal-dark);
+        border-radius: 999px;
+        background: linear-gradient(180deg, #dce4ea, var(--metal));
+        box-shadow: inset -16px 0 0 rgba(255, 255, 255, 0.2);
+        transform-origin: 10px 50%;
+        transform: {% if hand_state == "сжата" %}rotate(52deg){% else %}rotate(-46deg){% endif %};
+        transition: transform 0.2s ease;
+        z-index: 4;
+      }
+
+      .thumb::before {
+        content: "";
+        position: absolute;
+        left: 27px;
+        top: -3px;
+        width: 3px;
+        height: 22px;
+        background: var(--metal-dark);
+        opacity: 0.55;
       }
 
       .commands {
+        display: grid;
+        gap: 10px;
         margin-top: 24px;
         padding: 18px 20px;
-        border-radius: 16px;
-        background: #f6f1e7;
+        border-radius: 14px;
+        background: #f3f7fa;
       }
 
-      .commands p,
-      .note {
-        margin: 8px 0;
+      .commands p {
+        margin: 0;
       }
 
       code {
         padding: 2px 8px;
         border-radius: 999px;
-        background: #efe7d8;
+        background: #e1ebf1;
         font-family: Consolas, monospace;
       }
 
       a {
-        color: inherit;
-      }
-
-      .note {
-        color: var(--muted);
+        color: var(--accent-dark);
+        font-weight: 600;
       }
     </style>
   </head>
   <body>
     <main class="card">
-      <h1>Лампочка</h1>
-      <p class="status">Текущий статус: <strong>{{ bulb_state }}</strong></p>
+      <h1>Робо-рука</h1>
+      <p class="status">Текущий статус: <strong>{{ hand_state }}</strong></p>
 
-      <div class="lamp-wrap" aria-label="Состояние лампочки">
-        <div class="lamp"></div>
+      <div class="robot-area" aria-label="Состояние робо-руки">
+        <div class="robot-hand">
+          <div class="arm"></div>
+          <div class="joint"></div>
+          <div class="palm"></div>
+          <div class="thumb"></div>
+          <div class="finger top"></div>
+          <div class="finger middle"></div>
+          <div class="finger bottom"></div>
+        </div>
       </div>
 
       <div class="commands">
-        <p><a href="/button_on"><code>/button_on</code></a>, чтобы включить.</p>
-        <p><a href="/button_off"><code>/button_off</code></a>, чтобы выключить.</p>
+        <p><a href="/on"><code>/on</code></a> - сжать робо-руку.</p>
+        <p><a href="/off"><code>/off</code></a> - разжать робо-руку.</p>
       </div>
-
-      
     </main>
   </body>
 </html>
